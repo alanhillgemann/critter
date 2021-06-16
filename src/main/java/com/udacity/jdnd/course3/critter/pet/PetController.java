@@ -1,7 +1,9 @@
 package com.udacity.jdnd.course3.critter.pet;
 
+import com.udacity.jdnd.course3.critter.user.Customer;
 import com.udacity.jdnd.course3.critter.user.CustomerService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -14,8 +16,10 @@ import java.util.List;
 @RequestMapping("/pet")
 public class PetController {
 
+    @Autowired
     private CustomerService customerService;
 
+    @Autowired
     private PetService petService;
 
     public PetController(PetService petService, CustomerService customerService) {
@@ -37,15 +41,18 @@ public class PetController {
 
     @GetMapping("/owner/{ownerId}")
     public List<PetDTO> getPetsByOwner(@PathVariable long ownerId) {
-        List<Pet> pets = petService.findAllByCustomerId(ownerId);
+        Customer customer = customerService.findById(ownerId);
+        List<Pet> pets = petService.findAllByCustomer(customer);
         return convertPetsToPetDTOs(pets);
     }
 
     @PostMapping
     public PetDTO savePet(@RequestBody PetDTO petDTO) {
-        Pet Pet = convertPetDTOToPet(petDTO);
+        Pet pet = convertPetDTOToPet(petDTO);
         Long customerId = petDTO.getOwnerId();
-        return convertPetToPetDTO(petService.save(Pet, customerId));
+        Customer customer = customerService.findById(customerId);
+        Pet savedPet = petService.save(pet, customer);
+        return convertPetToPetDTO(savedPet);
     }
 
     private static Pet convertPetDTOToPet(PetDTO petDTO) {
@@ -56,9 +63,7 @@ public class PetController {
 
     private static List<PetDTO> convertPetsToPetDTOs(List<Pet> pets) {
         List<PetDTO> petDTOs = new ArrayList<>();
-        pets.forEach(pet -> {
-            petDTOs.add(convertPetToPetDTO(pet));
-        });
+        pets.forEach(pet -> petDTOs.add(convertPetToPetDTO(pet)));
         return petDTOs;
     }
 

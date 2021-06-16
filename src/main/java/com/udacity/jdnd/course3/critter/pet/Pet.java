@@ -6,7 +6,8 @@ import org.hibernate.annotations.Nationalized;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Pet {
@@ -19,8 +20,7 @@ public class Pet {
 
     @ManyToOne(
             fetch = FetchType.LAZY,
-            optional = false,
-            cascade = CascadeType.ALL
+            optional = false
     )
     private Customer customer;
 
@@ -31,34 +31,71 @@ public class Pet {
     private String notes;
 
     @ManyToMany
-    private Set<Schedule> schedules;
+    private List<Schedule> schedules;
 
     @Enumerated(EnumType.STRING)
     private PetType type;
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
-    public void setId(Long id) { this.id = id; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public LocalDate getBirthDate() { return birthDate; }
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
 
-    public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
 
-    public Customer getCustomer() { return customer; }
+    public Customer getCustomer() {
+        return customer;
+    }
 
-    public void setCustomer(Customer customer) { this.customer = customer; }
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
 
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getNotes() { return notes; }
+    public String getNotes() {
+        return notes;
+    }
 
-    public void setNotes(String notes) { this.notes = notes; }
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
 
-    // Schedules
+    public List<Schedule> getSchedules() {
+        return schedules;
+    }
 
-    public PetType getType() { return type; }
+    public void setSchedules(List<Schedule> schedules) {
+        this.schedules = schedules;
+    }
 
-    public void setType(PetType type) { this.type = type; }
+    public PetType getType() {
+        return type;
+    }
+
+    public void setType(PetType type) {
+        this.type = type;
+    }
+
+    public void addSchedule(Schedule schedule) {
+        if (schedules == null) {
+            schedules = new ArrayList<>();
+        }
+        schedules.add(schedule);
+    }
 }

@@ -9,11 +9,19 @@ public class EmployeeRequest {
 
     private Set<EmployeeSkill> skills;
 
-    public LocalDate getDate() { return date; }
+    public LocalDate getDate() {
+        return date;
+    }
 
-    public void setDate(LocalDate date) { this.date = date; }
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
 
-    public Set<EmployeeSkill> getSkills() { return skills; }
+    public Set<EmployeeSkill> getSkills() {
+        return skills;
+    }
 
-    public void setSkills(Set<EmployeeSkill> skills) { this.skills = skills; }
+    public void setSkills(Set<EmployeeSkill> skills) {
+        this.skills = skills;
+    }
 }

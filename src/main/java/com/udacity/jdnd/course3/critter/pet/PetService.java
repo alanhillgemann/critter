@@ -12,18 +12,15 @@ import java.util.List;
 public class PetService {
 
     @Autowired
-    private CustomerRepository customerRepository;
-
-    @Autowired
     private PetRepository petRepository;
 
     public List<Pet> findAll() {
         return petRepository.findAll();
     }
 
-    public List<Pet> findAllByCustomerId(Long customerId) {
-        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException("Customer " + customerId + " not found"));
-        return petRepository.findAllByCustomer_Id(customerId);
+    public List<Pet> findAllByCustomer(Customer customer) {
+        List<Pet> pets = petRepository.findAllByCustomer(customer);
+        return pets;
     }
 
     public Pet findById(Long petId) {
@@ -31,8 +28,7 @@ public class PetService {
         return pet;
     }
 
-    public Pet save(Pet pet, Long customerId) {
-        Customer customer = customerRepository.findById(customerId).orElseThrow(() -> new CustomerNotFoundException("Customer " + customerId + " not found"));
+    public Pet save(Pet pet, Customer customer) {
         pet.setCustomer(customer);
         Pet savedPet = petRepository.save(pet);
         customer.addPet(savedPet);

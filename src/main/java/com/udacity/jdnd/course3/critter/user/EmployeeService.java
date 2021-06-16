@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.DayOfWeek;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Transactional
@@ -17,6 +19,19 @@ public class EmployeeService {
     public Employee findById(Long employeeId) {
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(() -> new EmployeeNotFoundException("Employee " + employeeId + " not found"));
         return employee;
+    }
+
+    public List<Employee> findEmployeesForService(EmployeeRequest employeeRequest) {
+        DayOfWeek date = employeeRequest.getDate().getDayOfWeek();
+        Set<EmployeeSkill> skills = employeeRequest.getSkills();
+        List<Employee> employees = employeeRepository.findAll();
+        List<Employee> employeesForService = new ArrayList<>();
+        employees.forEach(employee -> {
+            if (employee.getDaysAvailable().contains(date) && employee.getSkills().containsAll(skills)) {
+                employeesForService.add(employee);
+            }
+        });
+        return employeesForService;
     }
 
     public Employee save(Employee employee) {

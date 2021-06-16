@@ -1,6 +1,9 @@
 package com.udacity.jdnd.course3.critter.user;
 
+import com.udacity.jdnd.course3.critter.pet.Pet;
+import com.udacity.jdnd.course3.critter.pet.PetService;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.DayOfWeek;
@@ -18,18 +21,26 @@ import java.util.Set;
 @RequestMapping("/user")
 public class UserController {
 
+    @Autowired
     private CustomerService customerService;
+
+    @Autowired
     private EmployeeService employeeService;
 
-    public UserController(CustomerService customerService, EmployeeService employeeService) {
+    @Autowired
+    private PetService petService;
+
+    public UserController(CustomerService customerService, EmployeeService employeeService, PetService petService) {
         this.customerService = customerService;
         this.employeeService = employeeService;
+        this.petService = petService;
     }
 
     @PostMapping("/customer")
     public CustomerDTO saveCustomer(@RequestBody CustomerDTO customerDTO){
         Customer customer = convertCustomerDTOToCustomer(customerDTO);
-        return convertCustomerToCustomerDTO(customerService.save(customer));
+        Customer savedCustomer = customerService.save(customer);
+        return convertCustomerToCustomerDTO(savedCustomer);
     }
 
     @GetMapping("/customer")
@@ -40,14 +51,16 @@ public class UserController {
 
     @GetMapping("/customer/pet/{petId}")
     public CustomerDTO getOwnerByPet(@PathVariable long petId){
-        Customer customer = customerService.findByPetId(petId);
+        Pet pet = petService.findById(petId);
+        Customer customer = customerService.findByPetId(pet);
         return convertCustomerToCustomerDTO(customer);
     }
 
     @PostMapping("/employee")
     public EmployeeDTO saveEmployee(@RequestBody EmployeeDTO employeeDTO) {
         Employee employee = convertEmployeeDTOToEmployee(employeeDTO);
-        return convertEmployeeToEmployeeDTO(employeeService.save(employee));
+        Employee savedEmployee = employeeService.save(employee);
+        return convertEmployeeToEmployeeDTO(savedEmployee);
     }
 
     @GetMapping("/employee/{employeeId}")
@@ -62,9 +75,10 @@ public class UserController {
     }
 
     @GetMapping("/employee/availability")
-    public List<EmployeeDTO> findEmployeesForService(@RequestBody EmployeeRequestDTO employeeDTO) {
-        // TODO
-        return null;
+    public List<EmployeeDTO> findEmployeesForService(@RequestBody EmployeeRequestDTO employeeRequestDTO) {
+        List<Employee> employees = employeeService.findEmployeesForService(
+                convertEmployeeRequestDTOToEmployeeRequest(employeeRequestDTO));
+        return convertEmployeesToEmployeeDTOs(employees);
     }
 
     private static Customer convertCustomerDTOToCustomer(CustomerDTO customerDTO) {
@@ -75,15 +89,19 @@ public class UserController {
 
     private static List<CustomerDTO> convertCustomersToCustomerDTOs(List<Customer> customers) {
         List<CustomerDTO> customerDTOs = new ArrayList<>();
-        customers.forEach(customer -> {
-            customerDTOs.add(convertCustomerToCustomerDTO(customer));
-        });
+        customers.forEach(customer -> customerDTOs.add(convertCustomerToCustomerDTO(customer)));
         return customerDTOs;
     }
 
     private static CustomerDTO convertCustomerToCustomerDTO(Customer customer) {
         CustomerDTO customerDTO = new CustomerDTO();
         BeanUtils.copyProperties(customer, customerDTO);
+        List<Long> petIds = new ArrayList<>();
+        List<Pet> pets = customer.getPets();
+        if (pets != null) {
+            customer.getPets().forEach(pet -> petIds.add(pet.getId()));
+            customerDTO.setPetIds(petIds);
+        }
         return customerDTO;
     }
 
@@ -97,6 +115,12 @@ public class UserController {
         EmployeeRequest request = new EmployeeRequest();
         BeanUtils.copyProperties(requestDTO, request);
         return request;
+    }
+
+    private static List<EmployeeDTO> convertEmployeesToEmployeeDTOs(List<Employee> employees) {
+        List<EmployeeDTO> employeeDTOs = new ArrayList<>();
+        employees.forEach(employee -> employeeDTOs.add(convertEmployeeToEmployeeDTO(employee)));
+        return employeeDTOs;
     }
 
     private static EmployeeDTO convertEmployeeToEmployeeDTO(Employee employee) {
